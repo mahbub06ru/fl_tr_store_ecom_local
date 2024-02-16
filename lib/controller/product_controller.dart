@@ -62,6 +62,8 @@ class ProductController extends GetxController {
                 }
               });
             }
+
+
           } catch (e) {
             print(e);
           }

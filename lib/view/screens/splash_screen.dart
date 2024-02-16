@@ -20,6 +20,11 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   void initState() {
+    print('productListDB.length');
+    print(_productController.productListDB.length);
+    if(_productController.productListDB.isNotEmpty){
+      _productController.productListDB.clear();
+    }
     _productController.getProductsFromAPI();
     Timer(
         const Duration(seconds: 3),

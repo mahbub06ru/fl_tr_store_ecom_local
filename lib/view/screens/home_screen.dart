@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ecom/controller/product_controller.dart';
 import 'package:ecom/util/constants.dart';
 
@@ -9,6 +11,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shimmer/shimmer.dart';
 
+import '../../database/database_helper.dart';
 import '../../model/product_list.dart';
 import '../widgets/product_card.dart';
 import '../widgets/product_card_shimmar.dart';
@@ -26,10 +29,55 @@ class _HomePageState extends State<HomePage> {
 
   final ProductController _productController = Get.find();
 
+  Future<bool> showExitPopup(context) async {
+    return await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: SizedBox(
+              height: 90,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("Do you want to exit?"),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            DatabaseHelper.instance.clearTable();
+                            exit(0);
+                          },
+                          child: const Text("Yes"),
+                        ),
+                      ),
+                      const SizedBox(width: 15),
+                      Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              //  print('no selected');
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text("No",
+                                style: TextStyle(color: Colors.black)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                            ),
+                          ))
+                    ],
+                  )
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
   @override
   void initState() {
     super.initState();
-    _productController.getDataFromDatabase();
+    // _productController.getDataFromDatabase();
   }
 
   @override
@@ -129,47 +177,56 @@ class _HomePageState extends State<HomePage> {
         ),
       ),*/
       //db
-      body: FutureBuilder(
-        future: _productController.getDataFromDatabase(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
-                child: ListView.builder(
-                  itemCount: 5,
-                  itemBuilder: (context, index) {
-                    return ProductCardShimmer();
-                  },
-                ),
-              ),
-            );
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
-          } else {
-            return ListView.builder(
-              itemCount: _productController.productListDB.length,
-              itemBuilder: (context, index) {
-                if (index >= 0 && index < _productController.productListDB.length) {
-                  ProductDB product = _productController.productListDB[index];
-                  return ProductCard(
-                    id: product.id.toString(),
-                    title: product.title ?? '',
-                    content: product.content ?? '',
-                    userId: product.userId.toString(),
-                    image: product.image ?? '',
-                    thumbnail: product.thumbnail ?? '',
-                  );
-                } else {
-                  return Container();
-                }
-              },
-            );
+      body:  PopScope(
+        canPop: false,
+        onPopInvoked: (bool didPop) {
+          if (didPop) {
+            return;
           }
+          showExitPopup(context);
         },
+        child: FutureBuilder(
+          future: _productController.getDataFromDatabase(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: ListView.builder(
+                    itemCount: 5,
+                    itemBuilder: (context, index) {
+                      return ProductCardShimmer();
+                    },
+                  ),
+                ),
+              );
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Text('Error: ${snapshot.error}'),
+              );
+            } else {
+              return ListView.builder(
+                itemCount: _productController.productListDB.length,
+                itemBuilder: (context, index) {
+                  if (index >= 0 && index < _productController.productListDB.length) {
+                    ProductDB product = _productController.productListDB[index];
+                    return ProductCard(
+                      id: product.id.toString(),
+                      title: product.title ?? '',
+                      content: product.content ?? '',
+                      userId: product.userId.toString(),
+                      image: product.image ?? '',
+                      thumbnail: product.thumbnail ?? '',
+                    );
+                  } else {
+                    return Container();
+                  }
+                },
+              );
+            }
+          },
+        ),
       ),
 
     );
