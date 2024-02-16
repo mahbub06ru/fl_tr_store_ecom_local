@@ -1,7 +1,6 @@
 import 'package:ecom/controller/cart_controller.dart';
 import 'package:ecom/controller/product_controller.dart';
-import 'package:ecom/model/product_cart.dart';
-import 'package:ecom/view/screens/payment_system.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -23,8 +22,8 @@ class ProductDetailsPage extends StatefulWidget {
 }
 
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
-  final CartController cartController = Get.put(CartController());
-  final ProductController _productController = Get.put(ProductController());
+  final CartController cartController = Get.find();
+  final ProductController _productController = Get.find();
  
 
   @override
@@ -32,7 +31,10 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title:Obx(()=>Text(_productController.productDetail.value!.title!??'')) ,
+        title: Obx(() {
+          final productDetail = _productController.productDetail.value;
+          return Text(productDetail?.title ?? 'Product Detail');
+        }),
       ),
       body: Obx(()=> _productController.isLoading.value? Shimmer.fromColors(
         baseColor: Colors.grey[300]!,

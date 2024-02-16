@@ -19,7 +19,13 @@ class CartDisplayPage extends StatefulWidget {
 }
 
 class _CartDisplayPageState extends State<CartDisplayPage> {
-  final CartController cartController = Get.put(CartController());
+  final CartController cartController = Get.find();
+
+  @override
+  void initState() {
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,15 +52,19 @@ class _CartDisplayPageState extends State<CartDisplayPage> {
                     itemBuilder: (context, index) {
                       if (index < cartController.cartList.length) {
                         final item = cartController.cartList[index];
-
+                        var singleProductPrice;
                         print('cal');
-                        double price = double.parse(item.userId);
-                        double quan = (item.quantity.toDouble());
-                        double tk = price*quan;
-                        print(item.userId);
-                        print(item.quantity);
-                        print(item.userId * item.quantity);
-                        final singleProductPrice = tk.toString();
+                        try {
+                          double price = double.parse(item.userId);
+                          double quan = (item.quantity.toDouble());
+                          double tk = price*quan;
+                          print(item.userId);
+                          print(item.quantity);
+                          print(item.userId * item.quantity);
+                          singleProductPrice = tk.toString();
+                        } catch (e) {
+                          print(e);
+                        }
                         return Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(2),

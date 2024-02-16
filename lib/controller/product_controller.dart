@@ -2,23 +2,23 @@ import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:ecom/controller/database_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
+import '../database/database_helper.dart';
 import '../model/product_detail.dart';
 import '../model/product_list.dart';
 
 class ProductController extends GetxController {
-  final DatabaseController _databaseController = Get.put(DatabaseController());
-  RxList<Product> productList = <Product>[].obs;
+  RxList<Product> productListAPI = <Product>[].obs;
+  RxList<ProductDB> productListDB = <ProductDB>[].obs;
   Rx<ProductDetail?> productDetail = Rx<ProductDetail?>(null);
   var isLoading = false.obs;
 
 
-  Future<void> getProducts() async {
+  Future<void> getProductsFromAPI() async {
     Connectivity().checkConnectivity().then((connection) async {
       if (connection == ConnectivityResult.mobile || connection == ConnectivityResult.wifi) {
         isLoading(true);
@@ -27,17 +27,16 @@ class ProductController extends GetxController {
 
         if (response.statusCode == 200) {
           final List<Product> products = productListFromJson(response.body);
-          productList.assignAll(products);
+          productListAPI.assignAll(products);
           isLoading(false);
           print('productList');
-          // print(productList.length);
-          //for db save
 
           try {
-            _databaseController.productsDB.clear();
-            if (_databaseController.productsDB.isEmpty) {
-              List<Map<String, dynamic>> jsonResponseList =
-              productList.value.map((product) => product.toJson()).toList();
+            productListDB.value.clear();
+
+            if (productListDB.value.isEmpty) {
+              List<Map<String, dynamic>> jsonResponseList = productListAPI.value.map((product) => product.toJson()).toList();
+
               jsonResponseList.forEach((entry) {
                 String id = entry["id"];
                 String title = entry["title"];
@@ -46,28 +45,22 @@ class ProductController extends GetxController {
                 String image = entry["image"];
                 String thumbnail = entry["thumbnail"];
 
-                var product = Product(
-                  id: id,
-                  title: title,
-                  content: content,
-                  userId: userId,
-                  image: image,
-                  thumbnail: thumbnail,
-                );
-                // print(product.title);
+                bool isProductExists = productListDB.value.any((existingProduct) => existingProduct.id == id);
 
-                _databaseController.addData(
-                  product.id,
-                  product.title,
-                  product.content,
-                  product.userId,
-                  product.image,
-                  product.thumbnail,
-                );
+                if (!isProductExists) {
+                  var product = ProductDB(
+                    id: id,
+                    title: title,
+                    content: content,
+                    userId: userId,
+                    image: image,
+                    thumbnail: thumbnail,
+                  );
 
+                  productListDB.value.add(product);
+                  DatabaseHelper.instance.insert(product); // Insert into database
+                }
               });
-            } else {
-              // Handle if products list is not empty
             }
           } catch (e) {
             print(e);
@@ -92,6 +85,20 @@ class ProductController extends GetxController {
 
   }
 
+  Future<void> getDataFromDatabase() async {
+    productListDB.value.clear();
+    List<Map<String, dynamic>> value = await DatabaseHelper.instance.queryAllRows();
+    value.forEach((element) {
+      productListDB.value.add(ProductDB(
+        id: element['id'],
+        title: element['title'],
+        content: element['content'],
+        userId: element['userId'],
+        image: element['image'],
+        thumbnail: element['thumbnail'],
+      ));
+    });
+  }
   Future<void> getProductDetail(String productId) async {
 
     Connectivity().checkConnectivity().then((connection) async {

@@ -68,23 +68,6 @@ class DatabaseHelper {
     return await db!.delete(table, where: '$columnId = ?', whereArgs: [id]);
   }
 
-  // Future<int> update(int id) async {
-  //   // final dbClient = await database;
-  //   // var res = await db.update("Customer", user.toMap(),
-  //   //     where: "id = ?", whereArgs: [user.id]);
-  //   // return res;
-  //
-  //   Database? db = await instance.database;
-  //   return await db!.update(table, where: '$columnId = ?', whereArgs: [id]);
-  // }
-
-  /*Future<int> update(BeatElement user) async {
-    Database? db = await instance.database;
-    var res = await db!.update(table, user.toJson(),
-        where: "id = ?", whereArgs: [user.id]);
-    return res;
-  }*/
-
   Future<void> clearTable() async {
     Database? db = await instance.database;
     await db!.rawQuery("DELETE FROM $table");
