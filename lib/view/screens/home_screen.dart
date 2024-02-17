@@ -77,7 +77,12 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // _productController.getDataFromDatabase();
+
+    /*_productController.getDataFromDatabase().then((value) {
+      print('productListDBInit');
+      print(_productController.productListDB.length);
+    });*/
+
   }
 
   @override
@@ -227,6 +232,7 @@ class _HomePageState extends State<HomePage> {
             }
           },
         ),
+
       ),
 
     );

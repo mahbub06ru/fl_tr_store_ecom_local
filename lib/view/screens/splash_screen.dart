@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controller/product_controller.dart';
+import '../../database/database_helper.dart';
 import '../../util/constants.dart';
 
 
@@ -21,6 +22,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     print('productListDB.length');
+    DatabaseHelper.instance.clearTable();
     print(_productController.productListDB.length);
     if(_productController.productListDB.isNotEmpty){
       _productController.productListDB.clear();

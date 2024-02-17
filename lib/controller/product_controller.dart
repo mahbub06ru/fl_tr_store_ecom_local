@@ -45,7 +45,11 @@ class ProductController extends GetxController {
                 String image = entry["image"];
                 String thumbnail = entry["thumbnail"];
 
-                bool isProductExists = productListDB.value.any((existingProduct) => existingProduct.id == id);
+                bool isProductExists = productListDB.value.any((existingProduct) =>
+                    existingProduct.id == id &&
+                    existingProduct.title == title &&
+                    existingProduct.content == content
+                );
 
                 if (!isProductExists) {
                   var product = ProductDB(
