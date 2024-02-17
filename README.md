@@ -13,6 +13,8 @@ Considering low-end mobile device users in rural areas, I have maintained local 
 for smooth operation where products will be saved initially in api call with network checking first.
 
 I use sqflite for local databse, GETX for state management, shimmar effect for loading, and observable variables.
+I also used badge for displaying item count in cart. I have committed block of codes coming from api for understanding 
+or use to later if necessary.
 
 Thanks
 
