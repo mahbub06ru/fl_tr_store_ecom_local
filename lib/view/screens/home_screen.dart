@@ -1,21 +1,23 @@
 import 'dart:io';
 
+import 'package:ecom/controller/cart_controller.dart';
 import 'package:ecom/controller/product_controller.dart';
 import 'package:ecom/util/constants.dart';
 
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-
-
+import 'package:badges/badges.dart' as badges;
 import 'package:http/http.dart' as http;
 import 'package:shimmer/shimmer.dart';
 
+import '../../controller/cart_db_controller.dart';
 import '../../database/database_helper.dart';
 import '../../model/product_list.dart';
 import '../widgets/product_card.dart';
 import '../widgets/product_card_shimmar.dart';
 import '../widgets/title_text.dart';
+import 'cart_db_display_screen.dart';
 import 'cart_display_screen.dart';
 
 class HomePage extends StatefulWidget {
@@ -26,8 +28,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   final ProductController _productController = Get.find();
+  final CartController _cartController = Get.find();
+  final CartDBController _cartDBController = Get.find();
 
   Future<bool> showExitPopup(context) async {
     return await showDialog(
@@ -55,16 +58,16 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(width: 15),
                       Expanded(
                           child: ElevatedButton(
-                            onPressed: () {
-                              //  print('no selected');
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text("No",
-                                style: TextStyle(color: Colors.black)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                            ),
-                          ))
+                        onPressed: () {
+                          //  print('no selected');
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text("No",
+                            style: TextStyle(color: Colors.black)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                        ),
+                      ))
                     ],
                   )
                 ],
@@ -82,7 +85,10 @@ class _HomePageState extends State<HomePage> {
       print('productListDBInit');
       print(_productController.productListDB.length);
     });*/
-
+    _cartDBController.fetchDataFromDatabase().then((value) {
+      print('cartListInit');
+      print(_cartDBController.cartDBList.length);
+    });
   }
 
   @override
@@ -91,38 +97,72 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text(Constants.appName),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_cart),
-            onPressed: () {
-             Get.to(()=>CartDisplayPage());
+          InkWell(
+            onTap: () {
+              Get.to(() => const CartDBDisplayPage());
             },
+            child: Padding(
+              padding: const EdgeInsets.only(right: 20.0, top: 15),
+              child: badges.Badge(
+                badgeContent:
+                Obx(() => Text(_cartDBController.cartDBList.length.toString(),style: const TextStyle(color: Colors.white),)),
+                child: const Column(
+                  children: [
+                    Icon(
+                      Icons.storage_sharp,
+                      color: Colors.black,
+                    ),
+                    // Text('Storage')
+                  ],
+                ),
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: () {
+              Get.to(() => const CartDisplayPage());
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(right: 20.0, top: 15),
+              child: badges.Badge(
+                badgeContent:
+                Obx(() => Text(_cartController.cartList.length.toString(),style: const TextStyle(color: Colors.white),)),
+                child: const Column(
+                  children: [
+                    Icon(
+                      Icons.shopping_cart,
+                      color: Colors.black,
+                    ),
+                    // Text('Storage')
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
       drawer: Drawer(
         child: ListView(
           children: [
-             DrawerHeader(
+            const DrawerHeader(
               decoration: BoxDecoration(
                 color: Colors.blue,
               ),
-              child: ListTile(
-                title: Text(Constants.appName,style: TextStyle(
-                  fontWeight: FontWeight.bold,color: Colors.white
-                ),),
-                subtitle: Column(
-                  children: [
-                    Text('Developed By: mahbub06ru@gmail.com',style: TextStyle(
-                        fontWeight: FontWeight.normal,color: Colors.white
-                    ),),
-                 /* Obx(() => Text(_productController.productListDB.length.toString(),style: TextStyle(
-                      fontWeight: FontWeight.normal,color: Colors.white
-                  ),),)*/
-                  ],
-                ),),
-
+              child: Center(
+                child: ListTile(
+                  title: Text(
+                    Constants.appName,
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                  subtitle: Text(
+                    'Developed By: mahbub06ru@gmail.com',
+                    style: TextStyle(
+                        fontWeight: FontWeight.normal, color: Colors.white),
+                  ),
+                ),
               ),
-
+            ),
             ListTile(
               leading: const Icon(
                 Icons.home,
@@ -138,8 +178,16 @@ class _HomePageState extends State<HomePage> {
               ),
               title: const Text('My Cart'),
               onTap: () {
-             
-                Get.to(()=>CartDisplayPage());
+                Get.to(() => const CartDisplayPage());
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.home,
+              ),
+              title: const Text('My Local Cart'),
+              onTap: () {
+                Get.to(() => const CartDBDisplayPage());
               },
             ),
           ],
@@ -182,7 +230,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),*/
       //db
-      body:  PopScope(
+      body: PopScope(
         canPop: false,
         onPopInvoked: (bool didPop) {
           if (didPop) {
@@ -214,7 +262,8 @@ class _HomePageState extends State<HomePage> {
               return ListView.builder(
                 itemCount: _productController.productListDB.length,
                 itemBuilder: (context, index) {
-                  if (index >= 0 && index < _productController.productListDB.length) {
+                  if (index >= 0 &&
+                      index < _productController.productListDB.length) {
                     ProductDB product = _productController.productListDB[index];
                     return ProductCard(
                       id: product.id.toString(),
@@ -232,12 +281,7 @@ class _HomePageState extends State<HomePage> {
             }
           },
         ),
-
       ),
-
     );
-
   }
 }
-
-

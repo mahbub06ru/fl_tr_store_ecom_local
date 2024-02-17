@@ -1,5 +1,6 @@
 
 import 'package:ecom/model/product_cart.dart';
+import 'package:ecom/model/product_cart_db.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -18,7 +19,7 @@ class DatabaseHelperCart {
   static const userId = 'userId';
   static const image = 'image';
   static const thumbnail = 'thumbnail';
-  static const quantity = 'quantity'; // Add quantity column
+  static const quantity = 'quantity';
 
   DatabaseHelperCart._privateConstructor();
 
@@ -53,22 +54,39 @@ class DatabaseHelperCart {
           ''');
   }
 
-  Future<int> insert(ProductCart todo) async {
+  Future<int> insert(ProductCartDB todo) async {
     Database? db = await instance.database;
     var res = await db!.insert(table, todo.toJson());
     return res;
   }
+
 
   Future<List<Map<String, dynamic>>> queryAllRows() async {
     Database? db = await instance.database;
     var res = await db!.query(table, orderBy: "$columnId ASC");
     return res;
   }
-
-  Future<int> delete(int id) async {
+  Future<List<Map<String, dynamic>>> queryRowsByUserId(String userId) async {
     Database? db = await instance.database;
-    return await db!.delete(table, where: '$columnId = ?', whereArgs: [id]);
+    var res =
+    await db!.query(table, where: '$userId = ?', whereArgs: [userId]);
+    return res;
   }
+  Future<int> delete(int id) async {
+    try {
+      print(id);
+      print('deleteid');
+      Database? db = await instance.database;
+      return await db!.delete(table, where: '$columnId = ?', whereArgs: [id]);
+    } catch (e, stackTrace) {
+      print('Error deleting item:');
+      print(e);
+      print('Stack trace:');
+      print(stackTrace);
+      return -1; // You might want to return a specific error code here.
+    }
+  }
+
 
   Future<void> clearTable() async {
     Database? db = await instance.database;
@@ -85,6 +103,16 @@ class DatabaseHelperCart {
     Database? db = await instance.database;
     await db!.rawUpdate(
         'UPDATE $table SET $quantity = $quantity - 1 WHERE $id = ?', [productId]);
+  }
+  Future<ProductCart?> getProductById(String productId) async {
+    Database? db = await instance.database;
+    var res = await db!.query(table, where: '$id = ?', whereArgs: [productId]);
+
+    if (res.isNotEmpty) {
+      return ProductCart.fromJson(res.first);
+    } else {
+      return null;
+    }
   }
 }
 

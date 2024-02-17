@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 
 
 import 'util/app_binding.dart';
+import 'view/screens/cart_db_display_screen.dart';
 import 'view/screens/product_details_screen.dart';
 
 void main() async{
@@ -51,7 +52,12 @@ class AppPages {
     ),
     GetPage(
         name: '/CartDisplayPage',
-        page: () => CartDisplayPage()
+        page: () => const CartDisplayPage()
+
+    ),
+    GetPage(
+        name: '/CartDBDisplayPage',
+        page: () => const CartDBDisplayPage()
 
     )
 

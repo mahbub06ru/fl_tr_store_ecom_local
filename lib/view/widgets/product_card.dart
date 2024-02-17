@@ -1,4 +1,5 @@
 import 'package:ecom/controller/cart_controller.dart';
+import 'package:ecom/controller/cart_db_controller.dart';
 import 'package:ecom/view/screens/product_details_screen.dart';
 import 'package:expandable_text/expandable_text.dart';
 import 'package:flutter/material.dart';
@@ -25,8 +26,9 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ProductController productController = Get.put(ProductController());
-    final CartController cartController = Get.put(CartController());
+    final ProductController productController = Get.find();
+    final CartController cartController =  Get.find();
+    final CartDBController cartDBController =  Get.find();
     return Card(
       elevation: 5,
       margin: const EdgeInsets.all(10),
@@ -63,6 +65,7 @@ class ProductCard extends StatelessWidget {
                     InkWell(
                         onTap: () {
                           cartController.addToCart(id,title,content,image,thumbnail,userId,1);
+                          cartDBController.addToCartDB(id,title,content,image,thumbnail,userId,1);
                           print('Add to Cart');
                         },
                         child: const Icon(Icons.add_shopping_cart_outlined)),

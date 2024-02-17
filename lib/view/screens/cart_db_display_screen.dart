@@ -1,5 +1,7 @@
+import 'package:ecom/controller/cart_db_controller.dart';
 import 'package:ecom/controller/product_controller.dart';
 import 'package:ecom/controller/cart_controller.dart';
+import 'package:ecom/database/database_helper_cart.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -7,22 +9,25 @@ import 'package:get/get.dart';
 import '../../model/product_cart.dart';
 import '../../model/product_list.dart';
 
-class CartDisplayPage extends StatefulWidget {
-  const CartDisplayPage({
+class CartDBDisplayPage extends StatefulWidget {
+  const CartDBDisplayPage({
     Key? key,
   }) : super(key: key);
 
   @override
-  State<CartDisplayPage> createState() => _CartDisplayPageState();
+  State<CartDBDisplayPage> createState() => _CartDBDisplayPageState();
 }
 
-class _CartDisplayPageState extends State<CartDisplayPage> {
-  final CartController cartController = Get.find();
+class _CartDBDisplayPageState extends State<CartDBDisplayPage> {
+  final CartDBController cartDBController = Get.find();
 
   @override
   void initState() {
-
     super.initState();
+   /* cartDBController.fetchDataFromDatabase().then((value) {
+      print('cartListInit');
+      print(cartDBController.cartDBList.length);
+    });*/
   }
 
   @override
@@ -30,9 +35,25 @@ class _CartDisplayPageState extends State<CartDisplayPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Cart'),
+        actions: [
+        /*  InkWell(
+            onTap: () {
+              DatabaseHelperCart.instance.clearTable();
+              Get.back();
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(right: 20.0, top: 15),
+              child: Icon(
+                Icons.delete,
+                color: Colors.black,
+              ),
+            ),
+          ),*/
+
+        ],
       ),
       body: Obx(
-            () => cartController.cartList.isEmpty
+            () => cartDBController.cartDBList.isEmpty
             ? const Center(
           child: Text("Your Cart is Empty"),
         )
@@ -46,20 +67,20 @@ class _CartDisplayPageState extends State<CartDisplayPage> {
                     separatorBuilder: (context, index) {
                       return const SizedBox(height: 10);
                     },
-                    itemCount: cartController.cartList.length,
+                    itemCount: cartDBController.cartDBList.length,
                     itemBuilder: (context, index) {
-                      if (index < cartController.cartList.length) {
-                        final item = cartController.cartList[index];
+                      if (index < cartDBController.cartDBList.length) {
+                        final item = cartDBController.cartDBList[index];
                         var singleProductPrice;
                         print('cal');
                         try {
-                          double price = double.parse(item.userId);
-                          double quan = (item.quantity.toDouble());
-                          double tk = price*quan;
+                          double price = double.parse(item.userId.toString());
+                          double quan = double.parse(item.quantity.toString());
+                          double tk = price * quan;
                           print(item.userId);
                           print(item.quantity);
-                          print(item.userId * item.quantity);
-                          singleProductPrice = tk.toString();
+                          print(tk);
+                          singleProductPrice = tk.toStringAsFixed(2); // Convert double to string with fixed decimal places
                         } catch (e) {
                           print(e);
                         }
@@ -115,7 +136,7 @@ class _CartDisplayPageState extends State<CartDisplayPage> {
                                           const SizedBox(width: 40),
                                           IconButton(
                                               onPressed: () {
-                                                cartController.removeFromCart(item);
+                                                cartDBController.removeFromCartDB(item);
                                               },
                                               icon: const Icon(
                                                   Icons.delete))
@@ -136,7 +157,7 @@ class _CartDisplayPageState extends State<CartDisplayPage> {
                                           const SizedBox(width: 48),
                                           IconButton(
                                               onPressed: () {
-                                                cartController.increment(item);
+                                                cartDBController.incrementDB(item);
                                               },
                                               icon: const Icon(
                                                   Icons.add)),
@@ -160,7 +181,7 @@ class _CartDisplayPageState extends State<CartDisplayPage> {
                                           ),
                                           IconButton(
                                               onPressed: () {
-                                                cartController.decrement(item);
+                                                cartDBController.decrementDB(item);
                                               },
                                               icon: const Icon(
                                                   Icons.remove))
@@ -187,12 +208,12 @@ class _CartDisplayPageState extends State<CartDisplayPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Total items (${cartController.totalQuantity.value})",
+                      "Total items (${cartDBController.totalQuantity.value})",
                       style: const TextStyle(
                           fontSize: 15, fontWeight: FontWeight.w700),
                     ),
                     Text(
-                      "Total Prices: ${cartController.totalPrice.value}",
+                      "Total Prices: ${cartDBController.totalPrice.value}",
                       style: const TextStyle(
                           fontSize: 15, fontWeight: FontWeight.w700),
                     ),
