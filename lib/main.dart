@@ -47,7 +47,7 @@ class AppPages {
 
     GetPage(
       name: '/ProductDetailsPage',
-      page: () => const ProductDetailsPage(productId: '')
+      page: () => const ProductDetailsPage(productId: '', title: '', content: '', image: '', thumbnail: '', userId: '',)
 
     ),
     GetPage(

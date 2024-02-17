@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controller/product_controller.dart';
+import '../../util/constants.dart';
 
 class ProductCard extends StatelessWidget {
   final String id;
@@ -66,14 +67,20 @@ class ProductCard extends StatelessWidget {
                         onTap: () {
                           cartController.addToCart(id,title,content,image,thumbnail,userId,1);
                           cartDBController.addToCartDB(id,title,content,image,thumbnail,userId,1);
-                          print('Add to Cart');
+                          print(Constants.addToCart);
                         },
                         child: const Icon(Icons.add_shopping_cart_outlined)),
                     ElevatedButton(
                         onPressed: () {
                           productController.getProductDetail(id);
                           Get.to(() => ProductDetailsPage(
-                              productId: id.toString()));
+                              productId: id.toString(),
+                              title: title.toString(),
+                              content: content.toString(),
+                              image: image.toString(),
+                              thumbnail: thumbnail.toString(),
+                              userId: userId.toString()
+                          ));
                         },
                         child: const Text('Details'))
                   ],
